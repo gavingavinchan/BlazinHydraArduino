@@ -32,6 +32,16 @@
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
 #include <EEPROM.h>
 
+#include <SoftSerial.h>
+#include <TinyPinChange.h>
+
+/*
+The circuit:
+ * RX is digital pin 10 (connect to TX of other device)
+ * TX is digital pin 11 (connect to RX of other device)
+ * 
+ */
+SoftSerial mySerial(4, 5); // RX, TX
 
 #define ledPin 1
 #define servoPinCh1 1
@@ -55,6 +65,9 @@ void setup() {
   pinMode(motorPin, OUTPUT);
 
   digitalWrite(motorPin,HIGH);         //initiate motor with default stop
+
+  // set the data rate for the SoftwareSerial port
+  mySerial.begin(9600);
 }
 
 int servoMicrosCh1 = 0;
@@ -68,7 +81,7 @@ void loop() {
     
     if(byteCommand == 0x00) {
       byte rotation = TinyWireS.receive();         //get value 
-      //Blink(1);
+      Blink(1);
       if(rotation) {                            //see if turn clock wise or counter clockwise
         digitalWrite(cwCcwPin, HIGH);           //send motor value to turn cw or ccw
       } else {
@@ -82,16 +95,35 @@ void loop() {
       
       analogWrite(motorPin,power);
       
-     } else if(byteCommand == 0x02) {            //command set value to write Servo microseconds
-        servoMicrosCh1 = TinyWireS.receive() << 8;
-        servoMicrosCh1 += TinyWireS.receive();
+    }else if(byteCommand == 0x02) {            //command set value to write Servo microseconds
+      servoMicrosCh1 = TinyWireS.receive() << 8;
+      servoMicrosCh1 += TinyWireS.receive();
 
-     } else if(byteCommand == 0x03) {
-        servoMicrosCh2 = TinyWireS.receive() << 8;
-        servoMicrosCh2 += TinyWireS.receive();
+    }else if(byteCommand == 0x03) {
+      servoMicrosCh2 = TinyWireS.receive() << 8;
+      servoMicrosCh2 += TinyWireS.receive();
         
-    } else if(byteCommand == 0x05) {
+    }else if(byteCommand == 0x05) {            //analog write from i2c read
       analogWrite(BIGLED, TinyWireS.receive());
+
+    }else if(byteCommand == 0x06) {            //serial write from i2c read
+        //Blink(1);
+        int messageLength = TinyWireS.receive();
+        int serialBuffer[255];
+        int recievedLength = 0;
+        while(TinyWireS.available()) {
+          //Blink(1);
+          serialBuffer[recievedLength] = TinyWireS.receive();
+          recievedLength++;
+        }
+
+        if(messageLength == recievedLength) {
+          Blink(1);
+          for(int i=0; i<recievedLength; i++) {
+            mySerial.write(serialBuffer[i]);
+          }
+        }
+        
       
     } else if(byteCommand == 0xCE) {            //command to change address
       byte newAddress = TinyWireS.receive();    //new address value
@@ -106,8 +138,8 @@ void loop() {
     }
   }
 
-
-/* //For Camera switching, disable if need to use commands that uses pin 1 or 3. like 0x05
+ /*
+ //For Camera switching, disable if need to use commands that uses pin 1 or 3. like 0x05
   //write Servo microseconds
   digitalWrite(servoPinCh1, HIGH);
   digitalWrite(servoPinCh2, HIGH);
@@ -123,20 +155,8 @@ void loop() {
     digitalWrite(servoPinCh2, LOW);
   }
   delayMicroseconds(20000 - servoMicrosCh1 - servoMicrosCh2);
-
 */
 
-/*
-  delay(1500);
-  if(servoMicros < 1300) {
-    Blink(1);
-  } else if(servoMicros <1700) {
-    Blink(2);
-  } else if(servoMicros >1700) {
-    Blink(3);
-  }
-  delay(1500);
-  */
 }
 
 void Blink(byte times){ 

@@ -1,4 +1,4 @@
-//For Digispark
+//For Arduino
  
  /* DTMF encoder (Dual Tone Generator) for a Phone Dialer
  *  Created by David Dubins, May 13th, 2016.
@@ -11,13 +11,15 @@
  * - Connect a momentary switch to Pin 8, and the other side of the switch to GND
  */
 
+#include <Wire.h>
+#include <EEPROM.h>
 
 #define ledPin 13
 
 const byte tone1Pin=2; // pin for tone 1
 const byte tone2Pin=13; // pin for tone 2
-byte PhoneNumber[]={8,6,7,5,3,0,9}; // for special characters: 10=*, 11=#, 12=1sec delay
-byte PhoneNumberLength = 7;  // adjust to length of phone number
+byte PhoneNumber[]={1,3,5,7,9,0,2,4,6,8}; // for special characters: 10=*, 11=#, 12=1sec delay
+byte PhoneNumberLength = 10;  // adjust to length of phone number
 
 // frequencies adopted from: https://en.wikipedia.org/wiki/Dual-tone_multi-frequency_signaling
 int DTMF[13][2]={
@@ -37,9 +39,15 @@ int DTMF[13][2]={
 };
 
 void setup() {
-
-//Blink(2); 
+  byte I2C_SLAVE_ADDR = 1;
+  //I2C_SLAVE_ADDR = EEPROM.read(0);         //get its own slave address from EEPROM
+  if(I2C_SLAVE_ADDR > 127 || I2C_SLAVE_ADDR < 1) {
+    I2C_SLAVE_ADDR = 127;
+  }
+  Wire.begin(I2C_SLAVE_ADDR);
+  
   pinMode(ledPin, OUTPUT);
+  Blink(2); 
   
   pinMode(tone1Pin,OUTPUT); // Output for Tone 1
   pinMode(tone2Pin,OUTPUT); // Output for Tone 2
@@ -47,7 +55,22 @@ void setup() {
 
 void loop() {
   dialNumber(PhoneNumber,PhoneNumberLength);  // Dial the number
+
+  if (Wire.available()){           // got I2C input!
+    Blink(1);
+    byte byteCommand = Wire.read();     //get command to turn motor
+    
+    if(byteCommand == 0xDF) {
+      int number = Wire.read();
+      dialNumber(number,1);
+      
+      Blink(1);
+    }
+  }
 }
+
+
+
 
 void playDTMF(byte digit, byte duration){
   boolean tone1state=false;
@@ -80,7 +103,16 @@ void playDTMF(byte digit, byte duration){
 void dialNumber(byte number[],byte len){
   for(int i=0;i<len;i++){
     playDTMF(number[i], 100);  // 100 msec duration of tone
-    delay(1000); // 100 msec pause between tones
+    delay(500); // 100 msec pause between tones
+  }
+}
+
+void Blink(byte times){ 
+  for (byte i=0; i< times; i++){
+    digitalWrite(ledPin,HIGH);
+    delay (175);
+    digitalWrite(ledPin,LOW);
+    delay (175);
   }
 }
 //END OF FILE
