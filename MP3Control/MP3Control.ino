@@ -62,8 +62,11 @@ void setup() {
     I2C_SLAVE_ADDR = 127;
   }
   TinyWireS.begin(I2C_SLAVE_ADDR);      // init I2C Slave mode
-  Blink(3); 
+  //pinMode(3, OUTPUT);
+  //digitalWrite(4, LOW);
   pinMode(ledPin, OUTPUT);
+  Blink(3); 
+
 
   // set the data rate for the SoftwareSerial port
   mySerial.begin(9600);
@@ -96,13 +99,29 @@ void loop() {
         mySerial.write(lowByte(checksum));
         mySerial.write(byte(0xEF));
 
-        delay(2000);
+        //delay(2000);
+
+    } else if(byteCommand == 0x07) {            //serial write from i2c read
+        
+        mySerial.write(byte(0x7E));
+        mySerial.write(byte(0xFF));
+        mySerial.write(byte(0x06));
+        mySerial.write(byte(0x16));
+        mySerial.write(byte(0x00));
+        mySerial.write(byte(0x00));
+        mySerial.write(byte(0x00));
+        int checksum = 0 - (int)(0xFF+0x06+0x16);
+        mySerial.write(highByte(checksum));
+        mySerial.write(lowByte(checksum));
+        mySerial.write(byte(0xEF));
+
+        //delay(2000);
 
     } else if(byteCommand == 0xCE) {            //command to change address
       byte newAddress = TinyWireS.receive();    //new address value
       //Write value
       EEPROM.put(0, newAddress);                //change address value
-      Blink(1000);    
+      //Blink(1000);    
       delay(1000);
       
     } else if(byteCommand == 0x10) {            //blink check to see if alive

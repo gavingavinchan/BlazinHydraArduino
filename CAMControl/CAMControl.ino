@@ -32,16 +32,8 @@
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
 #include <EEPROM.h>
 
-#include <SoftSerial.h>
-#include <TinyPinChange.h>
 
-/*
-The circuit:
- * RX is digital pin 10 (connect to TX of other device)
- * TX is digital pin 11 (connect to RX of other device)
- * 
- */
-SoftSerial mySerial(4, 5); // RX, TX
+
 
 #define ledPin 1
 #define servoPinCh1 1
@@ -65,9 +57,6 @@ void setup() {
   pinMode(motorPin, OUTPUT);
 
   digitalWrite(motorPin,HIGH);         //initiate motor with default stop
-
-  // set the data rate for the SoftwareSerial port
-  mySerial.begin(9600);
 }
 
 int servoMicrosCh1 = 0;
@@ -76,7 +65,7 @@ int servoMicrosCh2 = 0;
 void loop() {
   // put your main code here, to run repeatedly:
   if (TinyWireS.available()){           // got I2C input!
-    //Blink(3);
+    Blink(3);
     byte byteCommand = TinyWireS.receive();     //get command to turn motor
     
     if(byteCommand == 0x00) {
@@ -106,25 +95,6 @@ void loop() {
     }else if(byteCommand == 0x05) {            //analog write from i2c read
       analogWrite(BIGLED, TinyWireS.receive());
 
-    }else if(byteCommand == 0x06) {            //serial write from i2c read
-        //Blink(1);
-        int messageLength = TinyWireS.receive();
-        int serialBuffer[255];
-        int recievedLength = 0;
-        while(TinyWireS.available()) {
-          //Blink(1);
-          serialBuffer[recievedLength] = TinyWireS.receive();
-          recievedLength++;
-        }
-
-        if(messageLength == recievedLength) {
-          Blink(1);
-          for(int i=0; i<recievedLength; i++) {
-            mySerial.write(serialBuffer[i]);
-          }
-        }
-        
-      
     } else if(byteCommand == 0xCE) {            //command to change address
       byte newAddress = TinyWireS.receive();    //new address value
       //Write value

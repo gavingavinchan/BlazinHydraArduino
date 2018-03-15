@@ -1,15 +1,3 @@
-// Wire Master Writer
-// by Nicholas Zambetti <http://www.zambetti.com>
-
-// Demonstrates use of the Wire library
-// Writes data to an I2C/TWI slave device
-// Refer to the "Wire Slave Receiver" example for use with this
-
-// Created 29 March 2006
-
-// This example code is in the public domain.
-
-
 #include <Wire.h>
 #include <SoftwareSerial.h>
 #define ledPin 13
@@ -28,13 +16,22 @@ void setup() {
 
 
 void loop() {
-  int sound = 0x01;
+  //int sound = 0x01;
   //if( millis() % 5000 == 0){
   if(Serial.available() > 0) {
-    Wire.beginTransmission(0x17); 
+    Wire.beginTransmission(0x17);
+
+    int input = Serial.read();
+    if(input != 115) {
+      
     Wire.write(byte(0x06));        // command
-    byte sound = Serial.read()-48;
+    byte sound = input - 48;
     Wire.write(byte(sound));
+
+    } else {
+      Wire.write(byte(0x07));
+    } 
+    
    /*
     Wire.write(byte(0x04));
     
@@ -56,7 +53,7 @@ void loop() {
     Wire.endTransmission();    // stop transmitting
   
     //Blink(sound);
-    Serial.println(byte(sound));
+    Serial.println(byte(input));
   }
  if (mySerial.available()) {
     Serial.write((byte)mySerial.read());
