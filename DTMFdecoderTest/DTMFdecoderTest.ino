@@ -35,7 +35,7 @@ void loop() {
         case 0x06:
         Serial.println("Pin Pressed : 6");
         break;
-        case 7:
+        case 0x07:
         Serial.println("Pin Pressed : 7");
         break;
         case 0x08:

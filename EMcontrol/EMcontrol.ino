@@ -3,14 +3,10 @@
  *            1. I2c slave to sent PWM to motor control or turn on/off light with PWM
  *            2. Use EEPROM to rewrite its I2c address
  *            3. simple blink on command to check if it's alive
- * 
- * How to write Servo microseconds for channel 1
- *    1. send 0x02
- *    2. send value
  *    
- * How to write Servo microseconds for channel 2
- *    1. send 0x03
- *    2. send value
+ * How to analog write on pin 1, need to DISABLE servoMicros
+ *    1. send 0x05
+ *    2. send value 0~255
  *    
  * How to change address
  *    1. send 0xCE
@@ -24,14 +20,7 @@
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
 #include <EEPROM.h>
 
-
-
 #define ledPin 1
-#define servoPinCh1 1
-#define servoPinCh2 3
-
-#define motorPin 4
-#define cwCcwPin 3                      //cant use pin 5
 #define BIGLED 1
 
 void setup() {
@@ -44,27 +33,15 @@ void setup() {
   TinyWireS.begin(I2C_SLAVE_ADDR);      // init I2C Slave mode
   Blink(2); 
   pinMode(ledPin, OUTPUT);
-  pinMode(cwCcwPin, OUTPUT);
-  pinMode(motorPin, OUTPUT);
-
-  digitalWrite(motorPin,HIGH);         //initiate motor with default stop
 }
 
-int servoMicrosCh1 = 0;
-int servoMicrosCh2 = 0;
 
 void loop() {
   // put your main code here, to run repeatedly:
   if (TinyWireS.available()){           // got I2C input!
     byte byteCommand = TinyWireS.receive();     //get command to turn motor
-      
-    if(byteCommand == 0x02) {            //command set value to write Servo microseconds
-      servoMicrosCh1 = TinyWireS.receive() << 8;
-      servoMicrosCh1 += TinyWireS.receive();
-
-    } else if(byteCommand == 0x03) {
-      servoMicrosCh2 = TinyWireS.receive() << 8;
-      servoMicrosCh2 += TinyWireS.receive();
+    if(byteCommand == 0x05) {            //analog write from i2c read
+      analogWrite(BIGLED, TinyWireS.receive());
 
     } else if(byteCommand == 0xCE) {            //command to change address
       byte newAddress = TinyWireS.receive();    //new address value
@@ -77,24 +54,6 @@ void loop() {
       byte times = TinyWireS.receive();         //receive how many times to blink
       Blink(times);
     }
-
- 
- //For Camera switching, disable if need to use commands that uses pin 1 or 3. like 0x05
-  //write Servo microseconds
-  digitalWrite(servoPinCh1, HIGH);
-  digitalWrite(servoPinCh2, HIGH);
-  if(servoMicrosCh1 > servoMicrosCh2) {
-    delayMicroseconds(servoMicrosCh2);
-    digitalWrite(servoPinCh2, LOW);
-    delayMicroseconds(servoMicrosCh1 - servoMicrosCh2);
-    digitalWrite(servoPinCh1, LOW);
-  } else {
-    delayMicroseconds(servoMicrosCh1);
-    digitalWrite(servoPinCh1, LOW);
-    delayMicroseconds(servoMicrosCh2 - servoMicrosCh1);
-    digitalWrite(servoPinCh2, LOW);
-  }
-  delayMicroseconds(20000 - servoMicrosCh1 - servoMicrosCh2);
   }
 }
 
