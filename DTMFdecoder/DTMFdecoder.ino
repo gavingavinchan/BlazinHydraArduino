@@ -33,7 +33,7 @@ void setup() {
   for(i=4;i<=7;i++)
     pinMode(i, OUTPUT);  
   
-  pinMode(8, INPUT);
+  pinMode(2, INPUT);
   pinMode(10, INPUT);
   pinMode(11, INPUT);
   pinMode(12, INPUT);
@@ -47,11 +47,9 @@ void loop() {
   //Serial.println("still running");
 
   bool signal ;  
-  signal = digitalRead(8);
+  signal = digitalRead(2);
   
   if(codeRecieved == 0 || (millis()-codeDuration < maxDuration)) { /* If new pin pressed */
-    Serial.println("code renew");
-    delay(10);
     if(signal == HIGH) {
       delay(250);
       if(readTone() == code[codeRecieved]) {
@@ -66,7 +64,7 @@ void loop() {
   } else {
         codeRecieved = 0;
         codeDuration = 0;
-        Serial.println("not code");
+        Serial.println("reset");
   }
   
   if(codeRecieved == sizeof(code)/sizeof(int)) {
