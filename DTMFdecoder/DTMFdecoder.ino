@@ -17,13 +17,45 @@ void EMoff(void)                    //EM off
   digitalWrite(E2,LOW);      
 }  
 
-void EMon(char a,char b)          //EM on
-{
-  analogWrite (E1,a);
-  digitalWrite(M1,HIGH);    
-  analogWrite (E2,b);    
-  digitalWrite(M2,HIGH);
-}  
+void EMrelease() {
+ /*
+  EMon1(HIGH,255);
+  EMon2(HIGH,255);
+  delay(100);
+  EMon1(LOW,255);
+  EMon2(LOW,255);
+  delay(50);
+  EMon1(HIGH,255);
+  EMon2(HIGH,255);
+  delay(50);
+  EMon1(LOW,255);
+  EMon2(LOW,255);
+  delay(50);
+  EMoff();
+  delay(50);
+  EMon1(HIGH,255);
+  EMon2(HIGH,255);
+  delay(50);
+  EMon1(LOW,255);
+  EMon2(LOW,255);
+  delay(50);
+  */
+  EMon1(HIGH,255);
+  EMon2(HIGH,255);
+  delay(100);
+  
+  EMoff();
+}
+
+void EMon1(boolean dir, char str) {
+  analogWrite (E1,str);    //strength
+  digitalWrite(M1,dir);
+}
+
+void EMon2(boolean dir, char str) {
+  analogWrite (E2,str);    //strength
+  digitalWrite(M2,dir);
+}
 
 
 void setup() {
@@ -39,7 +71,8 @@ void setup() {
   pinMode(12, INPUT);
   pinMode(13, INPUT);
 
-  EMon(255,255);
+  EMon1(LOW,255);
+  EMon2(LOW,255);
 }
 
 
@@ -47,10 +80,11 @@ void loop() {
   //Serial.println("still running");
 
   bool signal ;  
-  signal = digitalRead(2);
+  signal = digitalRead(8);      //for old OBS:8, new OBS:2
   
   if(codeRecieved == 0 || (millis()-codeDuration < maxDuration)) { /* If new pin pressed */
     if(signal == HIGH) {
+      Serial.println("tone read");
       delay(250);
       if(readTone() == code[codeRecieved]) {
         if(codeRecieved == 0) {
@@ -69,9 +103,10 @@ void loop() {
   
   if(codeRecieved == sizeof(code)/sizeof(int)) {
     Serial.println("EM release");
-    EMoff();
+    EMrelease();
     delay(10000);
-    EMon(255,255);
+    EMon1(LOW,255);
+    EMon2(LOW,255);
   }
 }
 
