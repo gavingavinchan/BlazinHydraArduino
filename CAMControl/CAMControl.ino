@@ -25,14 +25,11 @@
 #include <EEPROM.h>
 
 
-
 #define ledPin 1
 #define servoPinCh1 1
 #define servoPinCh2 3
 
-#define motorPin 4
-#define cwCcwPin 3                      //cant use pin 5
-#define BIGLED 1
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -44,10 +41,7 @@ void setup() {
   TinyWireS.begin(I2C_SLAVE_ADDR);      // init I2C Slave mode
   Blink(2); 
   pinMode(ledPin, OUTPUT);
-  pinMode(cwCcwPin, OUTPUT);
-  pinMode(motorPin, OUTPUT);
-
-  digitalWrite(motorPin,HIGH);         //initiate motor with default stop
+  pinMode(servoPinCh2, OUTPUT);
 }
 
 int servoMicrosCh1 = 0;
@@ -56,16 +50,18 @@ int servoMicrosCh2 = 0;
 void loop() {
   // put your main code here, to run repeatedly:
   if (TinyWireS.available()){           // got I2C input!
+    //Blink(3);
     byte byteCommand = TinyWireS.receive();     //get command to turn motor
-      
+    
     if(byteCommand == 0x02) {            //command set value to write Servo microseconds
       servoMicrosCh1 = TinyWireS.receive() << 8;
       servoMicrosCh1 += TinyWireS.receive();
-
+    
     } else if(byteCommand == 0x03) {
       servoMicrosCh2 = TinyWireS.receive() << 8;
       servoMicrosCh2 += TinyWireS.receive();
-
+        
+      
     } else if(byteCommand == 0xCE) {            //command to change address
       byte newAddress = TinyWireS.receive();    //new address value
       //Write value
@@ -77,9 +73,8 @@ void loop() {
       byte times = TinyWireS.receive();         //receive how many times to blink
       Blink(times);
     }
+  }
 
- 
- //For Camera switching, disable if need to use commands that uses pin 1 or 3. like 0x05
   //write Servo microseconds
   digitalWrite(servoPinCh1, HIGH);
   digitalWrite(servoPinCh2, HIGH);
@@ -95,7 +90,6 @@ void loop() {
     digitalWrite(servoPinCh2, LOW);
   }
   delayMicroseconds(20000 - servoMicrosCh1 - servoMicrosCh2);
-  }
 }
 
 void Blink(byte times){ 
@@ -106,9 +100,3 @@ void Blink(byte times){
     delay (175);
   }
 }
-
-byte mapPower(byte value) {           //map power from byte form with a range of 0~255 to PWM form 255~0~255
-  return 2*abs((int)value-127);
-}
-
-

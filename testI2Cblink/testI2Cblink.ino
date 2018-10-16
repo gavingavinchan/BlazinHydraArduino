@@ -13,7 +13,7 @@
 #include <Wire.h>
 #define ledPin 13
 
-#define slaveAddr 0x16
+#define slaveAddr 0x17
 
 void setup() {
   Wire.begin(); // join i2c bus (address optional for master)
@@ -25,12 +25,17 @@ byte x = 0;
 void loop() {
   
   Blink(1);                // Arduino Master Blink
-  Wire.beginTransmission(slaveAddr); // transmit to device
+  Wire.beginTransmission(0x16); // transmit to device
+  Wire.write(0x10);        // Slave blink command
+  Wire.write(1);        // blink for how much times
+  Wire.endTransmission();    // stop transmitting
+
+  Wire.beginTransmission(0x17); // transmit to device
   Wire.write(0x10);        // Slave blink command
   Wire.write(1);        // blink for how much times
   Wire.endTransmission();    // stop transmitting
   delay(1000);
-  
+  /*
   Blink(2);                // Arduino Master Blink
   Wire.beginTransmission(slaveAddr); // transmit to device
   Wire.write(0x10);        // Slave blink command
@@ -44,6 +49,8 @@ void loop() {
   Wire.write(3);        // blink for how much times
   Wire.endTransmission();    // stop transmitting
   delay(1000);
+  */
+  
 }
 
 void Blink(byte times){ 

@@ -13,6 +13,8 @@
 #include <Wire.h>
 #define ledPin 13
 
+#define addr 0x17
+
 void setup() {
   Wire.begin(); // join i2c bus (address optional for master)
   pinMode(ledPin, OUTPUT);
@@ -23,7 +25,7 @@ byte x = 0;
 void loop() {
   
   Blink(1);
-  Wire.beginTransmission(0x16); // transmit to device #8
+  Wire.beginTransmission(addr); // transmit to device #8
   Wire.write(0x02);        // sends five bytes
   Wire.write(1100 >> 8);              // sends one byte
   Wire.write(1100%255);
@@ -32,11 +34,11 @@ void loop() {
   Wire.write(1100 >> 8);              // sends one byte
   Wire.write(1100%255);
   Wire.endTransmission();    // stop transmitting
-  delay(5000);
+  delay(3000);
   
   
   Blink(2);
-  Wire.beginTransmission(0x16); // transmit to device #8
+  Wire.beginTransmission(addr); // transmit to device #8
   Wire.write(0x02);        // sends five bytes
   Wire.write(1500 >> 8);              // sends one byte
   Wire.write(1500%255);
@@ -46,18 +48,18 @@ void loop() {
   Wire.write(1500 >> 8);              // sends one byte
   Wire.write(1500%255);
   Wire.endTransmission();    // stop transmitting
-  delay(1000);
+  delay(3000);
 
   
   Blink(3);
-  Wire.beginTransmission(0x16); // transmit to device #8
+  Wire.beginTransmission(addr); // transmit to device #8
   Wire.write(0x02);        // sends five bytes
-  Wire.write(1900 >> 8);              // sends one byte
-  Wire.write(1900%255);
+  Wire.write(1500 >> 8);              // sends one byte
+  Wire.write(1500%255);
 
   Wire.write(0x03);        // sends five bytes
-  Wire.write(1100 >> 8);              // sends one byte
-  Wire.write(1100%255);
+  Wire.write(1500 >> 8);              // sends one byte
+  Wire.write(1500%255);
   Wire.endTransmission();    // stop transmitting
   delay(1000);
   
