@@ -26,43 +26,74 @@ void loop() {
   
   Blink(1);
   Wire.beginTransmission(addr); // transmit to device #8
-  Wire.write(0x02);        // sends five bytes
+  Wire.write(0x11);        // sends five bytes
   Wire.write(1100 >> 8);              // sends one byte
   Wire.write(1100%255);
   
-  Wire.write(0x03);        // sends five bytes
+  Wire.write(0x12);        // sends five bytes
   Wire.write(1100 >> 8);              // sends one byte
   Wire.write(1100%255);
+  delay(3000);
+
+  Wire.write(0x13);        // sends five bytes
+  Wire.write(1100 >> 8);              // sends one byte
+  Wire.write(1100%255);
+  delay(3000);
+
+  Wire.write(0x14);        // sends five bytes
+  Wire.write(1100 >> 8);              // sends one byte
+  Wire.write(1100%255);
+  
   Wire.endTransmission();    // stop transmitting
   delay(3000);
   
   
   Blink(2);
   Wire.beginTransmission(addr); // transmit to device #8
-  Wire.write(0x02);        // sends five bytes
+  Wire.write(0x11);        // sends five bytes
   Wire.write(1500 >> 8);              // sends one byte
   Wire.write(1500%255);
 
   
-  Wire.write(0x03);        // sends five bytes
+  Wire.write(0x12);        // sends five bytes
   Wire.write(1500 >> 8);              // sends one byte
   Wire.write(1500%255);
-  Wire.endTransmission();    // stop transmitting
   delay(3000);
 
+  Wire.write(0x13);        // sends five bytes
+  Wire.write(1500 >> 8);              // sends one byte
+  Wire.write(1500%255);
+  delay(3000);
+
+  Wire.write(0x14);        // sends five bytes
+  Wire.write(1500 >> 8);              // sends one byte
+  Wire.write(1500%255);
+  
+  Wire.endTransmission();    // stop transmitting
+  delay(3000);
   
   Blink(3);
   Wire.beginTransmission(addr); // transmit to device #8
-  Wire.write(0x02);        // sends five bytes
+  Wire.write(0x11);        // sends five bytes
   Wire.write(1500 >> 8);              // sends one byte
   Wire.write(1500%255);
 
-  Wire.write(0x03);        // sends five bytes
+  Wire.write(0x12);        // sends five bytes
   Wire.write(1500 >> 8);              // sends one byte
   Wire.write(1500%255);
-  Wire.endTransmission();    // stop transmitting
   delay(1000);
+
+  Wire.write(0x13);        // sends five bytes
+  Wire.write(1500 >> 8);              // sends one byte
+  Wire.write(1500%255);
+  delay(3000);
+
+  Wire.write(0x14);        // sends five bytes
+  Wire.write(1500 >> 8);              // sends one byte
+  Wire.write(1500%255);
   
+  Wire.endTransmission();    // stop transmitting
+  delay(3000);
 }
 
 void Blink(byte times){ 
